@@ -195,6 +195,7 @@ def convertingLISA():
 
     # key is path to image file, value is all <class, x_center, y_center, width, height> for that image file
     final_dict = dict()
+    c = 0
 
     for sdir in sub_dir:
         if sdir=='dayTrain' or sdir == "nightTrain":
@@ -205,6 +206,7 @@ def convertingLISA():
                     annot_csv = csv.reader(annot, delimiter=';')
                     next(annot_csv)
                     for row in annot_csv:
+                        c+=1
                         # path to the corresponding image
                         abs_path = "/home/autobike/Downloads/LISA/"+sdir+"/"+sdir+"/"+ssdir+"/frames/"+row[0].split('/')[1]
                             
@@ -235,6 +237,8 @@ def convertingLISA():
                 annot_csv = csv.reader(annot, delimiter=';')
                 next(annot_csv)
                 for row in annot_csv:
+                    c+=1
+
                     LISA_dir = row[0].split('/')[1].split("--")[0]
                     abs_path = "/home/autobike/Downloads/LISA/"+LISA_dir+"/"+LISA_dir+"/frames/"+row[0].split('/')[1]
 
@@ -257,8 +261,9 @@ def convertingLISA():
                         final_dict[abs_path].append(data_to_save)
                     else:
                         final_dict[abs_path] = [data_to_save]
-
-    f = open("LISA_to_raph.json")
+            
+            print(f"{100*c/226353}%")
+    f = open("LISA_to_raph.json", "w")
     data = json.dump(final_dict, f)
 
 convertingLISA()
