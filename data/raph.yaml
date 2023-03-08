@@ -1,0 +1,12 @@
+# This yaml file is configured to combine some of COCO(common objects) data set and the LISA(stoplights) dataset
+train: ./raph/train2017.txt  
+val: ./raph/val2017.txt 
+test: ./raph/test-dev2017.txt
+
+# number of classes
+nc: 21
+
+# class names # need 7 lisa classes
+names: [ 'person', 'bicycle', 'car', 'motorcycle', 'bus', 'truck', 'traffic light',
+         'fire hydrant', 'stop sign', 'parking meter', 'bench', 'cat', 'dog', 'horse',
+         'warning', 'stopLeft', 'warningLeft', 'go', 'goLeft', 'stop', 'goForward']
