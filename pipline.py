@@ -155,7 +155,7 @@ def filterCOCO():
         with open(raph_path+"/"+p+".json", "w") as f:
             json.dump(keepers, f)
 
-# Read json dumped file and copying images to the right location in raph
+# Read json dumped file and copying images to the right location in raph+
 def moveImages():
 
     raph_path = "/home/autobike/yolov7/raph/labels/"
@@ -177,6 +177,7 @@ def moveImages():
             shutil.copy("/home/autobike/yolov7/coco/images/" + p + "/" + imagename , images_path + p)
             shutil.copy("/home/autobike/yolov7/coco/labels/" + p + "/" + filename , raph_path + p)
 
+# Outputs a jason with all the LISA annotation converted to YOLOv7 annotation files
 def convertingLISA():
 
     LISA_to_Raph = {
@@ -199,16 +200,36 @@ def convertingLISA():
         if sdir=='dayTrain' or sdir == "nightTrain":
             sub_sub_dir = os.listdir(direct+sdir)
             for ssdir in sub_sub_dir:
-                # print(ssdir)
                 for annotfile in os.listdir(direct+"/"+sdir+"/"+ssdir):
                     annot = open(direct+"/"+sdir+"/"+ssdir+"/"+annotfile)
                     annot_csv = csv.reader(annot, delimiter=';')
                     next(annot_csv)
-                    # for row in annot_csv:
-                    #     # 'Filename', 'Annotation tag', 'Upper left corner X', 'Upper left corner Y', 'Lower right corner X', 'Lower right corner Y', 'Origin file', 'Origin frame number', 'Origin track', 'Origin track frame number']
-                        
-                    #     img_shape = cv2.imread()
+                    for row in annot_csv:
+                        # path to the corresponding image
+                        abs_path = "/home/autobike/Downloads/LISA/"+sdir+"/"+sdir+"/"+ssdir+"/frames/"+row[0].split('/')[1]
+                            
+                        # opening img to normalize the coordinates
+                        img_shape = cv2.imread(abs_path).shape
+
+                        # changing the class from one of 7 LISA class to the corresponding class in raph.yaml
+                        raph_class = LISA_to_Raph[row[1]]
+
+                        # Changing the coordinates from Upper left corner X', 'Upper left corner Y', 'Lower right corner X', 'Lower right corner Y' to <x_center, y_center, width, height>
+                        up_left_x, up_left_y, low_right_x, low_right_y = float(row[2]), float(row[3]), float(row[4]), float(row[5])
+                        width = abs(up_left_x-low_right_x)
+                        height = abs(up_left_y-low_right_y)
+                        center_x = up_left_x+width/2
+                        center_y = up_left_y+height/2
+                        data_to_save = (raph_class, center_x/img_shape[1], center_y/img_shape[0], width/img_shape[1], height/img_shape[0])
+
+                        # saving new data into a json
+                        if abs_path in final_dict:
+                            final_dict[abs_path].append(data_to_save)
+                        else:
+                            final_dict[abs_path] = [data_to_save]
+
         else:
+
             for annotfile in os.listdir(direct+"/"+sdir):
                 annot = open(direct+"/"+sdir+"/"+annotfile)
                 annot_csv = csv.reader(annot, delimiter=';')
@@ -217,12 +238,27 @@ def convertingLISA():
                     LISA_dir = row[0].split('/')[1].split("--")[0]
                     abs_path = "/home/autobike/Downloads/LISA/"+LISA_dir+"/"+LISA_dir+"/frames/"+row[0].split('/')[1]
 
-                    img_shape = cv2.imread(abs_path)
+                    # opening img to normalize the coordinates
+                    img_shape = cv2.imread(abs_path).shape
 
-                    coco_class = LISA_to_Raph[row[1]]
-                    up_left_x, up_left_y, low_right_x, low_right_y = row[2], row[3], row[4], row[5]
-                    
-                    normed = 
-                    
+                    # changing the class from one of 7 LISA class to the corresponding class in raph.yaml
+                    raph_class = LISA_to_Raph[row[1]]
+
+                    # Changing the coordinates from Upper left corner X', 'Upper left corner Y', 'Lower right corner X', 'Lower right corner Y' to <x_center, y_center, width, height>
+                    up_left_x, up_left_y, low_right_x, low_right_y = float(row[2]), float(row[3]), float(row[4]), float(row[5])
+                    width = abs(up_left_x-low_right_x)
+                    height = abs(up_left_y-low_right_y)
+                    center_x = up_left_x+width/2
+                    center_y = up_left_y+height/2
+                    data_to_save = (raph_class, center_x/img_shape[1], center_y/img_shape[0], width/img_shape[1], height/img_shape[0])
+
+                    # saving new data into a json
+                    if abs_path in final_dict:
+                        final_dict[abs_path].append(data_to_save)
+                    else:
+                        final_dict[abs_path] = [data_to_save]
+
+    f = open("LISA_to_raph.json")
+    data = json.dump(final_dict, f)
 
 convertingLISA()
