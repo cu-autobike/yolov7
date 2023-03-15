@@ -263,6 +263,7 @@ def convertingLISA():
                         final_dict[abs_path] = [data_to_save]
             
             print(f"{100*c/226353}%")
+            
     f = open("LISA_to_raph.json", "w")
     data = json.dump(final_dict, f)
 
