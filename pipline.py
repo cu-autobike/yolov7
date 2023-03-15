@@ -3,6 +3,7 @@ import os
 import json
 import shutil
 import cv2
+import random
 
 # Get the list of classes for LISA
 def getLabelsLISA():
@@ -31,18 +32,6 @@ def getLabelsLISA():
 
     
     print(LISA_classes)
-
-# making raph directory where we store the data
-"""
-    mkdir raph
-    mkdir raph/annotations
-    mkdir raph/images
-    mkdir raph/images/test2017
-    mkdir raph/images/train2017
-    mkdir raph/labels
-    mkdir raph/labels/train2017
-    mkdir raph/labels/val2017
-"""
 
 # filter out classes out of coco we will not use
 def filterCOCO():
@@ -130,7 +119,7 @@ def filterCOCO():
         '79': -1
     }
 
-    for p in ["train2017", "val2017"]:
+    for p in ["train2017", "val2017", "test2017"]:
         
         path = coco_path + "/" + p
         keepers = dict()
@@ -176,6 +165,11 @@ def moveImages():
             imagename = filename.replace(".txt", ".jpg")
             shutil.copy("/home/autobike/yolov7/coco/images/" + p + "/" + imagename , images_path + p)
             shutil.copy("/home/autobike/yolov7/coco/labels/" + p + "/" + filename , raph_path + p)
+
+# The full coco pipeline
+def COCOPipeline():
+    filterCOCO()
+    moveImages()
 
 # Outputs a jason with all the LISA annotation converted to YOLOv7 annotation files
 def convertingLISA():
@@ -263,8 +257,92 @@ def convertingLISA():
                         final_dict[abs_path] = [data_to_save]
             
             print(f"{100*c/226353}%")
-            
+
     f = open("LISA_to_raph.json", "w")
     data = json.dump(final_dict, f)
 
-convertingLISA()
+# We have json with images and annotations, we now need to move them to raph folder
+def moveLISAAnnotations():
+    f = open("LISA_to_raph.json")
+    data = json.load(f)
+
+    for image in data.keys():
+
+        if random.random()<0.85:
+            # add image to train
+            shutil.copy(image, "/home/autobike/yolov7/raph/images/train2017")
+
+            annot = []
+
+            for single_annot in data[image]:
+                temp = ""
+                for n in single_annot:
+                    temp+=str(n)+" "
+                
+                annot.append(temp[:-1])
+
+            with open("/home/autobike/yolov7/raph/labels/train2017/"+image.split("/")[-1][:-3]+"txt", "w") as f:
+                
+                for a in annot:
+                    f.write(a)
+
+        elif random.random() < 0.32:
+            # add to val
+
+            shutil.copy(image, "/home/autobike/yolov7/raph/images/val2017")
+
+            annot = []
+
+            for single_annot in data[image]:
+                temp = ""
+                for n in single_annot:
+                    temp+=str(n)+" "
+                
+                annot.append(temp[:-1])
+
+            with open("/home/autobike/yolov7/raph/labels/val2017/"+image.split("/")[-1][:-3]+"txt", "w") as f:
+                
+                for a in annot:
+                    f.write(a)
+        else:
+            # add to test
+            shutil.copy(image, "/home/autobike/yolov7/raph/images/test2017")
+
+            annot = []
+
+            for single_annot in data[image]:
+                temp = ""
+                for n in single_annot:
+                    temp+=str(n)+" "
+                
+                annot.append(temp[:-1])
+
+            with open("/home/autobike/yolov7/raph/labels/test2017/"+image.split("/")[-1][:-3]+"txt", "w") as f:
+                
+                for a in annot:
+                    f.write(a)
+
+def make_txt_with_all_images_and_annotations_this_means_making_val2017_and_train2017_and_testdev2017():
+    f = open("/home/autobike/yolov7/raph/test-dev2017.txt", "w")
+    f.close()
+
+    with open("/home/autobike/yolov7/raph/train2017.txt", "w") as f:
+        pass
+
+    with open("/home/autobike/yolov7/raph/val2017.txt", "w") as f:
+        pass
+
+make_txt_with_all_images_and_annotations_this_means_making_val2017_and_train2017_and_testdev2017() 
+
+def pipeline():
+    # making raph directory where we store the data
+    os.mkdir("raph")
+    os.mkdir("raph/annotations")
+    os.mkdir("raph/images")
+    os.mkdir("raph/images/test2017")
+    os.mkdir("raph/images/train2017")
+    os.mkdir("raph/labels")
+    os.mkdir("raph/labels/train2017")
+    os.mkdir("raph/labels/val2017")
+
+    COCOPipeline()
