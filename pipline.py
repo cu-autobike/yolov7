@@ -327,10 +327,16 @@ def make_txt_with_all_images_and_annotations_this_means_making_val2017_and_train
     f.close()
 
     with open("/home/autobike/yolov7/raph/train2017.txt", "w") as f:
-        pass
+        to_write = os.listdir("/home/autobike/yolov7/raph/images/train2017")
+
+        f.write("\n".join(to_write))
+
 
     with open("/home/autobike/yolov7/raph/val2017.txt", "w") as f:
-        pass
+        to_write = os.listdir("/home/autobike/yolov7/raph/images/val2017")
+
+        f.write("\n".join(to_write))
+
 
 make_txt_with_all_images_and_annotations_this_means_making_val2017_and_train2017_and_testdev2017() 
 
