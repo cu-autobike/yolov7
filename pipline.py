@@ -36,6 +36,8 @@ def getLabelsLISA():
 # filter out classes out of coco we will not use
 def filterCOCO():
 
+    raph_path = "/home/autobike/yolov7/raph/labels/"
+
     coco_to_raph = {
         '0' : 0,
         '1' : 1,
@@ -119,9 +121,9 @@ def filterCOCO():
         '79': -1
     }
 
-    for p in ["train2017", "val2017", "test2017"]:
+    for p in ["train2017", "val2017"]:
         
-        path = coco_path + "/" + p
+        path = "/home/autobike/yolov7/coco/labels/" + p
         keepers = dict()
 
         all_files = os.listdir(path)
@@ -162,6 +164,7 @@ def moveImages():
         images_path = "/home/autobike/yolov7/raph/images/"
 
         for filename in l:
+            print(filename)
             imagename = filename.replace(".txt", ".jpg")
             shutil.copy("/home/autobike/yolov7/coco/images/" + p + "/" + imagename , images_path + p)
             shutil.copy("/home/autobike/yolov7/coco/labels/" + p + "/" + filename , raph_path + p)
@@ -322,6 +325,11 @@ def moveLISAAnnotations():
                 for a in annot:
                     f.write(a)
 
+# LISA pipeline
+def LISAPipeline():
+    convertingLISA()
+    moveLISAAnnotations()
+
 def make_txt_with_all_images_and_annotations_this_means_making_val2017_and_train2017_and_testdev2017():
     f = open("/home/autobike/yolov7/raph/test-dev2017.txt", "w")
     f.close()
@@ -329,16 +337,15 @@ def make_txt_with_all_images_and_annotations_this_means_making_val2017_and_train
     with open("/home/autobike/yolov7/raph/train2017.txt", "w") as f:
         to_write = os.listdir("/home/autobike/yolov7/raph/images/train2017")
 
-        f.write("\n".join(to_write))
+        for img in to_write:
+            f.write("./images/train2017/"+img+"\n")
 
 
     with open("/home/autobike/yolov7/raph/val2017.txt", "w") as f:
         to_write = os.listdir("/home/autobike/yolov7/raph/images/val2017")
 
-        f.write("\n".join(to_write))
-
-
-make_txt_with_all_images_and_annotations_this_means_making_val2017_and_train2017_and_testdev2017() 
+        for img in to_write:
+            f.write("./images/val2017/"+img+"\n")
 
 def pipeline():
     # making raph directory where we store the data
@@ -351,4 +358,17 @@ def pipeline():
     os.mkdir("raph/labels/train2017")
     os.mkdir("raph/labels/val2017")
 
+    print('Directory made')
     COCOPipeline()
+
+    # Temporary
+    return
+
+    print("Finished with COCO")
+    LISAPipeline()
+
+    print('Finished LISA')
+
+    make_txt_with_all_images_and_annotations_this_means_making_val2017_and_train2017_and_testdev2017() 
+
+pipeline()
