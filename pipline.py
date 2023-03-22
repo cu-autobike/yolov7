@@ -4,6 +4,7 @@ import json
 import shutil
 import cv2
 import random
+import shutil
 
 # Get the list of classes for LISA
 def getLabelsLISA():
@@ -164,10 +165,10 @@ def moveImages():
         images_path = "/home/autobike/yolov7/raph/images/"
 
         for filename in l:
-            print(filename)
             imagename = filename.replace(".txt", ".jpg")
             shutil.copy("/home/autobike/yolov7/coco/images/" + p + "/" + imagename , images_path + p)
-            shutil.copy("/home/autobike/yolov7/coco/labels/" + p + "/" + filename , raph_path + p)
+            with open("/home/autobike/yolov7/coco/labels/" + p + "/" + filename, "w") as f:
+                f.write(data[filename])
 
 # The full coco pipeline
 def COCOPipeline():
@@ -348,9 +349,14 @@ def make_txt_with_all_images_and_annotations_this_means_making_val2017_and_train
             f.write("./images/val2017/"+img+"\n")
 
 def pipeline():
+    # Deleting raph if it exists
+    try:
+        shutil.rmtree("/home/autobike/yolov7/raph")
+    except:
+        pass
+
     # making raph directory where we store the data
     os.mkdir("raph")
-    os.mkdir("raph/annotations")
     os.mkdir("raph/images")
     os.mkdir("raph/images/test2017")
     os.mkdir("raph/images/train2017")
@@ -370,5 +376,8 @@ def pipeline():
     print('Finished LISA')
 
     make_txt_with_all_images_and_annotations_this_means_making_val2017_and_train2017_and_testdev2017() 
+
+    os.remove("/home/autobike/yolov7/raph/labels/train2017.json")
+    os.remove("/home/autobike/yolov7/raph/labels/val2017.json")
 
 pipeline()
