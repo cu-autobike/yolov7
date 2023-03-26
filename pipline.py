@@ -167,7 +167,7 @@ def moveImages():
         for filename in l:
             imagename = filename.replace(".txt", ".jpg")
             shutil.copy("/home/autobike/yolov7/coco/images/" + p + "/" + imagename , images_path + p)
-            with open("/home/autobike/yolov7/coco/labels/" + p + "/" + filename, "w") as f:
+            with open("/home/autobike/yolov7/raph/labels/" + p + "/" + filename, "w") as f:
                 f.write(data[filename])
 
 # The full coco pipeline
@@ -272,7 +272,7 @@ def moveLISAAnnotations():
 
     for image in data.keys():
 
-        if random.random()<0.85:
+        if random.random()<0.95:
             # add image to train
             shutil.copy(image, "/home/autobike/yolov7/raph/images/train2017")
 
@@ -290,7 +290,7 @@ def moveLISAAnnotations():
                 for a in annot:
                     f.write(a)
 
-        elif random.random() < 0.32:
+        else:
             # add to val
 
             shutil.copy(image, "/home/autobike/yolov7/raph/images/val2017")
@@ -305,23 +305,6 @@ def moveLISAAnnotations():
                 annot.append(temp[:-1])
 
             with open("/home/autobike/yolov7/raph/labels/val2017/"+image.split("/")[-1][:-3]+"txt", "w") as f:
-                
-                for a in annot:
-                    f.write(a)
-        else:
-            # add to test
-            shutil.copy(image, "/home/autobike/yolov7/raph/images/test2017")
-
-            annot = []
-
-            for single_annot in data[image]:
-                temp = ""
-                for n in single_annot:
-                    temp+=str(n)+" "
-                
-                annot.append(temp[:-1])
-
-            with open("/home/autobike/yolov7/raph/labels/test2017/"+image.split("/")[-1][:-3]+"txt", "w") as f:
                 
                 for a in annot:
                     f.write(a)
@@ -358,7 +341,7 @@ def pipeline():
     # making raph directory where we store the data
     os.mkdir("raph")
     os.mkdir("raph/images")
-    os.mkdir("raph/images/test2017")
+    os.mkdir("raph/images/val2017")
     os.mkdir("raph/images/train2017")
     os.mkdir("raph/labels")
     os.mkdir("raph/labels/train2017")
@@ -366,9 +349,6 @@ def pipeline():
 
     print('Directory made')
     COCOPipeline()
-
-    # Temporary
-    return
 
     print("Finished with COCO")
     LISAPipeline()
